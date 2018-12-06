@@ -19,7 +19,6 @@ def CONSULTAR(X,Y,m,id_campo,nivel,Qx1,Qy):
      global niveles     
      global N_favoritos
      global MENSAJES_ITER
-     global pregunte
 
      global SALTO   # el salto que da t para pasar al futuro
      SALTO=999
@@ -29,11 +28,6 @@ def CONSULTAR(X,Y,m,id_campo,nivel,Qx1,Qy):
 
      # print(rr)
      #Resp.write(rr)  
-     
-     # 
-     # si en la fila Y hay un 1 para ese mens y campo, ignorar cons
-    
-     
      if restantes[X]>0: # and MODO == "I" or MODO=="S":
           lista_subcampos=[]
           ccons=numpy.zeros(N_campos, dtype=int)
@@ -55,165 +49,159 @@ def CONSULTAR(X,Y,m,id_campo,nivel,Qx1,Qy):
           tot=0
           lista_subcampos=[]
           if restantes[Y] >0 :  # and MODO == "I" or MODO=="S":
-               if not( (Y,id_msg,id_campo) in pregunte and pregunte[Y,id_msg,id_campo]== True):
-                  
-                    for i in range (1,N_campos):
-                         if formado_por[id_campo,i]== 1:
-                              lista_subcampos.append(i)
-                              tot=tot+1
-     
-                         # ***********************************************************************************************
-                    aleat= random.random()*tot
-                    ncons=int(aleat)
-                    k=0
-                    Z=0
-                         # si no tiene subcampos tot esta en 0 y ncons=0. Si no tiene subcampos asumo que Y no consulta.
-                    if ncons> 0 and not X == Y:
-     
-                         kk=0
-                         for k in range(0,ncons):
-                              s=random.random()
-                              if (X,Y,m,k) in Qx:
-                                   prob=Qx[X,Y,m,k]
-                              else:
-                                   prob=0.5
-                              if s > prob : 
-                                   # aniadir k a la lista de campos a consultar
-     
-                                   if k not in ccons:
-                                        ccons[kk]=k
-                                        kk=kk+1
-                                        if not (Y,m,id_campo) in pendientes:
-                                             pendientes[Y,m,id_campo]=0
-                                        pendientes[Y,m,id_campo]=pendientes[Y,m,id_campo] + 1   
-     
-     
-     
-                    # generar estructuras de que X consulta a Y +++++++++++++++++++++
-                    #
-                    #
-                         espera=int(random.random()*100)
-                         MENSAJES_ITER=MENSAJES_ITER+1
-                         tipo_mens[a+espera,X,Y,m,id_campo]=1
-                         t_generac[X,Y,m,id_campo,a+espera]=a
-                         t_entrada[X,Y,m,id_campo, a]= a+espera
-                         f=id_campo
-                         if (Y, m,f ) in largo_cola:
-                              largo_cola[Y, m, f]= largo_cola[Y, m, f] +1
+               for i in range (1,N_campos):
+                    if formado_por[id_campo,i]== 1:
+                         lista_subcampos.append(i)
+                         tot=tot+1
+
+                    # ***********************************************************************************************
+               aleat= random.random()*tot
+               ncons=int(aleat)
+               k=0
+               Z=0
+                    # si no tiene subcampos tot esta en 0 y ncons=0. Si no tiene subcampos asumo que Y no consulta.
+               if ncons> 0 and not X == Y:
+
+                    kk=0
+                    for k in range(0,ncons):
+                         s=random.random()
+                         if (X,Y,m,k) in Qx:
+                              prob=Qx[X,Y,m,k]
                          else:
-                              largo_cola[X, m, ccons[k]]= 1
-                         niveles[X, Y,m, ccons[k]]=nivel
-                         restantes[X]=restantes[X]-1  
-                         
-                         a=a+1
-                         
-                    # print("genere la consulta X Y")      
-                         # Y consulta a otro por subcampo
-                         fav=0
-               #   print(" Y  consulta a Z. campos a consultar  ",ccons[0:20])
-                         #    rr="campos a consultar  "+str(ccons[0:20])+"\n"
-                         #    Resp.write(rr)
-                                   # ncons dice hasta cuantos campos consulto, kk dice cuantos subcampos consulto realmente
-                         if kk>0: 
-                              #   print("voy a ver subcampos")
-                              k=0
-                              while k < kk:
-                                   if restantes[Y] > 0  : #and MODO == "I" or MODO=="S":
-                                        favor=[]
-                                        p=1
-     
-                                        favor=arma_lista_fav(Y,ccons[k],favor,N_favoritos,N_agentes)
-                                   #  print("fav  para Y ******",Y, "campo",ccons[k],"  ", favor)
-                                   #  print("EXITOS FAV PARA ", Y, "=" )
-                                   #  for x in range (1, N_agentes):
-                                   #  print(FAVORITOS[Y,x ,ccons[k]], " ");
-                                        rr="fav *****"+str(favor[0:10])+"\n"
-               #          Resp.write(rr)
-     
-                                        p=1
-     
-                                        while  p < len(favor):  # en realidad habria que distinguir su ya se determinaron los favoritos y sino usar muchos como fin de loop
-                                             Z= favor[p-1]
-                                             Qz=0.0 # ojo. poner 0.0 a todas las calidades como valor inicial
-                                             if restantes[Y]>0  : # and MODO == "I" or MODO=="S":
-                                                  if not Z == X:
-                                                       nivel=nivel+1
-                                                       niveles[Y,Z,m, ccons[k]]=nivel
-                                                       if not (X,Y,m, ccons[k]) in S:
-                                                            S[X,Y,m, ccons[k]] = 1
-                                                            largo_cola[Y, m, ccons[k]] = 1
-                                                       else:
-                                                            S[X,Y,m, ccons[k]] = S[X,Y,m, ccons[k]] +1
-     
-                                                       largo_cola[Y, m, ccons[k]]=largo_cola[Y, m, ccons[k]]+1
-                                                  # S[Y,id_msg, ccons[k]] = S[Y,id_msg, ccons[k]] +1 
-     
-                                                       Qx[Y,Z,m, ccons[k]]=niveles[Y,Z,m, ccons[k]]/(1+H[Y,ccons[k]])*(1/ niveles[Y,Z,m, ccons[k]])**(PESO_NIVEL + 1)  # +++++ en realidad seria la calidad propia de Y para ese campo ++++++
-     
-     
-                                                       rr="Genero consulta de Y =" +str(Y)+"a Z ="+str(Z)+ " msg "+str(m)+ " campo  "+ str(ccons[k]) + " cola  "+str(largo_cola[Y, m, ccons[k]])+"Qx"+str(Qx[Y,Z,m,ccons[k]])+"\n"
-     
-                                                       espera=int(random.random()*100) + espera
-     
-                                                       tipo_mens[a+espera,X,Y,m,id_campo]=1
-                                                       t_generac[X,Y,m,id_campo,a+espera]=a
-                                                       MENSAJES_ITER=MENSAJES_ITER+1
-                                                       t_entrada[X,Y,m,id_campo, a]= a+espera
-                                                       f=ccons[k]
-                                                       if (Z, m,f ) in largo_cola:
-                                                            largo_cola[Z, m, ccons[k]]= largo_cola[Z, m, ccons[k]] +1
-                                                       else:
-                                                            largo_cola[Z, m, ccons[k]]= 1
-                                                       niveles[Y, Z,m, ccons[k]]=nivel
-                                                       restantes[Y]=restantes[Y]-1
-                                                       a=a+1
-                                             p=p+1
-                                   k=k+1         
-                         else:
-                         #      print("no hay subcampos. Contesto")
-     
-                              # calcular Q propia usando nivel, error, etc
-                              #n=niveles[X,Y,id_msg,id_campo]
-                              #   CALCULO_Qy_SIMPLE(Y, id_msg, id_campo, Qy)
-                              Qy=1/(1+H[Y,id_campo])
-                              Qx[X,Y,m,id_campo]=Qy
-                              if Qy > Qx1 and restantes[Y]>0  and MODO == "I" or MODO=="S" and restantes[Y]>0:
-     
-                                   Qy=devuelvo_resp(Y,X,m,id_campo,nivel,Qy)
-                         #   print("devuelvo respuesta ",Y,X,id_msg,id_campo,str(nivel),str(Qy))
-                                   rr="devuelvo respuesta "+"Y "+ str(Y)+"X "+str(X)+" msg "+str(m)+"campo "+str(id_campo)+ "nivel "+str(nivel)+" Qy "+str(Qy)+"\n"    
-                                   # Resp.write(rr)   
-     
-                    else:          
-                         # calcular Qy usando nivel, error, etc 
-                         # CALCULO_Qy(X,Y,id_msg,id_campo,Qy)
-                         #  Qyy=1
-                         #  CALCULO_Qy_SIMPLE(Y,id_msg,id_campo,Qyy)
-                         #  Qy=Qyy
+                              prob=0.5
+                         if s > prob : 
+                              # aniadir k a la lista de campos a consultar
+
+                              if k not in ccons:
+                                   ccons[kk]=k
+                                   kk=kk+1
+                                   if not (Y,m,id_campo) in pendientes:
+                                        pendientes[Y,m,id_campo]=0
+                                   pendientes[Y,m,id_campo]=pendientes[Y,m,id_campo] + 1   
+
+
+
+               # generar estructuras de que X consulta a Y +++++++++++++++++++++
+               #
+               #
+                    espera=int(random.random()*100)
+                    MENSAJES_ITER=MENSAJES_ITER+1
+                    tipo_mens[a+espera,X,Y,m,id_campo]=1
+                    t_generac[X,Y,m,id_campo,a+espera]=a
+                    t_entrada[X,Y,m,id_campo, a]= a+espera
+                    f=id_campo
+                    if (Y, m,f ) in largo_cola:
+                         largo_cola[Y, m, f]= largo_cola[Y, m, f] +1
+                    else:
+                         largo_cola[X, m, ccons[k]]= 1
+                    niveles[X, Y,m, ccons[k]]=nivel
+                    restantes[X]=restantes[X]-1  
+                    
+                    a=a+1
+                    
+               # print("genere la consulta X Y")      
+                    # Y consulta a otro por subcampo
+                    fav=0
+          #   print(" Y  consulta a Z. campos a consultar  ",ccons[0:20])
+                    #    rr="campos a consultar  "+str(ccons[0:20])+"\n"
+                    #    Resp.write(rr)
+                              # ncons dice hasta cuantos campos consulto, kk dice cuantos subcampos consulto realmente
+                    if kk>0: 
+                         #   print("voy a ver subcampos")
+                         k=0
+                         while k < kk:
+                              if restantes[Y] > 0  : #and MODO == "I" or MODO=="S":
+                                   favor=[]
+                                   p=1
+
+                                   favor=arma_lista_fav(Y,ccons[k],favor,N_favoritos,N_agentes)
+                              #  print("fav  para Y ******",Y, "campo",ccons[k],"  ", favor)
+                              #  print("EXITOS FAV PARA ", Y, "=" )
+                              #  for x in range (1, N_agentes):
+                              #  print(FAVORITOS[Y,x ,ccons[k]], " ");
+                                   rr="fav *****"+str(favor[0:10])+"\n"
+          #          Resp.write(rr)
+
+                                   p=1
+
+                                   while  p < len(favor):  # en realidad habria que distinguir su ya se determinaron los favoritos y sino usar muchos como fin de loop
+                                        Z= favor[p-1]
+                                        Qz=0.0 # ojo. poner 0.0 a todas las calidades como valor inicial
+                                        if restantes[Y]>0  : # and MODO == "I" or MODO=="S":
+                                             if not Z == X:
+                                                  nivel=nivel+1
+                                                  niveles[Y,Z,m, ccons[k]]=nivel
+                                                  if not (X,Y,m, ccons[k]) in S:
+                                                       S[X,Y,m, ccons[k]] = 1
+                                                       largo_cola[Y, m, ccons[k]] = 1
+                                                  else:
+                                                       S[X,Y,m, ccons[k]] = S[X,Y,m, ccons[k]] +1
+
+                                                  largo_cola[Y, m, ccons[k]]=largo_cola[Y, m, ccons[k]]+1
+                                             # S[Y,id_msg, ccons[k]] = S[Y,id_msg, ccons[k]] +1 
+
+                                                  Qx[Y,Z,m, ccons[k]]=niveles[Y,Z,m, ccons[k]]/(1+H[Y,ccons[k]])*(1/ niveles[Y,Z,m, ccons[k]])**(PESO_NIVEL + 1)  # +++++ en realidad seria la calidad propia de Y para ese campo ++++++
+
+
+                                                  rr="Genero consulta de Y =" +str(Y)+"a Z ="+str(Z)+ " msg "+str(m)+ " campo  "+ str(ccons[k]) + " cola  "+str(largo_cola[Y, m, ccons[k]])+"Qx"+str(Qx[Y,Z,m,ccons[k]])+"\n"
+
+                                                  espera=int(random.random()*100) + espera
+
+                                                  tipo_mens[a+espera,X,Y,m,id_campo]=1
+                                                  t_generac[X,Y,m,id_campo,a+espera]=a
+                                                  MENSAJES_ITER=MENSAJES_ITER+1
+                                                  t_entrada[X,Y,m,id_campo, a]= a+espera
+                                                  f=ccons[k]
+                                                  if (Z, m,f ) in largo_cola:
+                                                       largo_cola[Z, m, ccons[k]]= largo_cola[Z, m, ccons[k]] +1
+                                                  else:
+                                                       largo_cola[Z, m, ccons[k]]= 1
+                                                  niveles[Y, Z,m, ccons[k]]=nivel
+                                                  restantes[Y]=restantes[Y]-1
+                                                  a=a+1
+                                        p=p+1
+                              k=k+1         
+                    else:
+                    #      print("no hay subcampos. Contesto")
+
+                         # calcular Q propia usando nivel, error, etc
+                         #n=niveles[X,Y,id_msg,id_campo]
+                         #   CALCULO_Qy_SIMPLE(Y, id_msg, id_campo, Qy)
                          Qy=1/(1+H[Y,id_campo])
                          Qx[X,Y,m,id_campo]=Qy
-                         #  +++++++
-                         if not Y == X:
-                              nivel=nivel+ 1
-     
-                    if Qy > Qx1 and restantes[Y]>0  and MODO == "I" or MODO=="S" and restantes[Y]>0:
-                         # devolver respuesta // poner en la cola de mens de entrada de Y un mens de resp con hora 100 mas que t
-               #        print("VOY A devuelvo respuesta ",Y,X,id_msg,id_campo,str(nivel),str(Qy))
-                         # print("voy a devolver resp Qy",Qy)
-                         Qy=devuelvo_resp(Y,X,m,id_campo,nivel,Qy)
-                         Qx[X,Y,m,id_campo]=Qy # tomo la calidad y no me fijo si es un T O 
-               #   print  ("devuelvo resp por ncons =0", "X",X,"Y",Y,"campo",id_campo,"Qy",Qy)
-                         rr="devuelvo respuesta "+str(Y)+str(X)+str(m)+str(id_campo)+str(nivel)+str(Qy)+"\n"        
-               
-               else:
-                    Qy=Qy=1/(1+H[Y,id_campo])
+                         if Qy > Qx1 and restantes[Y]>0  and MODO == "I" or MODO=="S" and restantes[Y]>0:
+
+                              Qy=devuelvo_resp(Y,X,m,id_campo,nivel,Qy)
+                    #   print("devuelvo respuesta ",Y,X,id_msg,id_campo,str(nivel),str(Qy))
+                              rr="devuelvo respuesta "+"Y "+ str(Y)+"X "+str(X)+" msg "+str(m)+"campo "+str(id_campo)+ "nivel "+str(nivel)+" Qy "+str(Qy)+"\n"    
+                              # Resp.write(rr)   
+
+               else:          
+                    # calcular Qy usando nivel, error, etc 
+                    # CALCULO_Qy(X,Y,id_msg,id_campo,Qy)
+                    #  Qyy=1
+                    #  CALCULO_Qy_SIMPLE(Y,id_msg,id_campo,Qyy)
+                    #  Qy=Qyy
+                    Qy=1/(1+H[Y,id_campo])
                     Qx[X,Y,m,id_campo]=Qy
+                    #  +++++++
+                    if not Y == X:
+                         nivel=nivel+ 1
+
+               if Qy > Qx1 and restantes[Y]>0  and MODO == "I" or MODO=="S" and restantes[Y]>0:
+                    # devolver respuesta // poner en la cola de mens de entrada de Y un mens de resp con hora 100 mas que t
+          #        print("VOY A devuelvo respuesta ",Y,X,id_msg,id_campo,str(nivel),str(Qy))
+                    # print("voy a devolver resp Qy",Qy)
+                    Qy=devuelvo_resp(Y,X,m,id_campo,nivel,Qy)
+                    Qx[X,Y,m,id_campo]=Qy # tomo la calidad y no me fijo si es un T O 
+          #   print  ("devuelvo resp por ncons =0", "X",X,"Y",Y,"campo",id_campo,"Qy",Qy)
+                    rr="devuelvo respuesta "+str(Y)+str(X)+str(m)+str(id_campo)+str(nivel)+str(Qy)+"\n"        
+               #  Resp.write(rr)
      else: 
           return(Qy)
 
      return(Qy)
-   
-     
+
 #************************************************************************************
 
 def CALCULO_Qy(X,Y,m,id_campo,Qy):
@@ -1059,16 +1047,12 @@ def PROCESO_ARCH():
      import numpy, random
      global id_msg, MAXMENS, MAXREGS,N_agentes,MAXIT,MIN_CONF_O,MAX_CONF_O, hora_inicial
      global a, decision,line111, RESTANTES_ANT,RESTANTES_ANT_REG
-     global t_entrada, tipo_mens, t_generac, largo_cola,Q,Qx,niveles,S,T  , pendientes, restantes,cuenta_to, cuenta_e, cuenta_a, TABLA_TO, MENSAJES_ITER, pregunte
+     global t_entrada, tipo_mens, t_generac, largo_cola,Q,Qx,niveles,S,T  , pendientes, restantes,cuenta_to, cuenta_e, cuenta_a, TABLA_TO, MENSAJES_ITER
      TIMEOUTS=0
      
 
      hora_inicial=numpy.zeros((MAXIT+1,MAXMENS+1,N_campos+1),dtype=int)   # la hora a la que omega consulta al sistema
-     #hora_inicial=numpy.zeros((34,40,74),dtype=int)   # la hora a la que omega consulta al sistema   
-     
-     #pregunte=numpy.zeros((N_agentes+1,N_agentes+1,MAXMENS+1, N_campos+1), dtype=bool) # si ya pregunto un agente a otro por ese campo en ese mensaje. previene loops.
-     pregunte={}
-     
+     #hora_inicial=numpy.zeros((34,40,74),dtype=int)   # la hora a la que omega consulta al sistema          
      
 #  cuenta_to=0
      cuenta_e=0
@@ -1274,13 +1258,6 @@ def PROCESO_ARCH():
                          Qaux=Q[xx,ag,m,campo]
 
                          #S[xx,m,campo]=S[xx,m,campo]+1
-                         
-                         
-                         
-                                   
-                     
-                         if (ag,m,campo) in pregunte and pregunte[ag,i,m,campo] ==True and MODO == "I" or MODO=="S":
-                              pregunte[xx,ag,m,campo]=True                         
                          if restantes[xx]>0  :     # and MODO == "I" or MODO=="S":
                               
                               CONSULTAR(xx, ag,m, campo,niveles[xx, ag, m, campo], Qaux,Qy)  
@@ -1304,14 +1281,14 @@ def PROCESO_ARCH():
 
      #    print("proceso mensajes de OMEGA en main()") 
         
-          if not (1,m,decision) in largo_cola:
-               largo_cola[1,m,decision] = 0
+          #if not (1,m,decision) in largo_cola:
+               #largo_cola[1,m,decision] = 0
 
-          #while k < largo_cola[1,id_msg,decision] + 1:
-          #while k < 100:
-          taux1=a
-          ES_EXITO_A=0
-          ES_EXITO_E=0
+          ##while k < largo_cola[1,id_msg,decision] + 1:
+          ##while k < 100:
+          #taux1=a
+          #ES_EXITO_A=0
+          #ES_EXITO_E=0
           #for (a,xx, ag, m, campo) in sorted(list(tipo_mens.keys())) :
                #ES_EXITO_E=0
                #ES_EXITO_A=0
@@ -1492,17 +1469,9 @@ def main():
      global Resp
      global id_msg
      global MAXMENS,N_agentes, MAXIT,MAXREGS,MIN_CONF_O,MAX_CONF_O,N_campos, hora_inical
-     global t_entrada, t_generac, tipo_mens, largo_cola, niveles, pendientes, restantes, MENSAJES_ITER,a, pregunte
-     
+     global t_entrada, t_generac, tipo_mens, largo_cola, niveles, pendientes, restantes, MENSAJES_ITER,a
 
     
-    # import py_compile
-    # aq=1
-   #  Qwww=py_compile.compile("C:/Users/hpaggi/Dropbox/docs tesis/prototipo/cuarto negocio/simuladorrapido.py", cfile="C:/Users/hpaggi/Dropbox/docs tesis/prototipo/cuarto negocio/rapidito")
-   #  print(Qwww)
-   #
-   #
-   #aq=2    
      
      MENSAJES_ITER=0
      s="LOG DE SIMULADOR.txt"
@@ -1627,7 +1596,7 @@ def main():
      MAXREGS= 32 
 
      #for N_agentes in (10,40):
-     for N_agentes in (600,700):
+     for N_agentes in (100,200,300,600):
 
           # los errores  y los topes de confianza
           MIN_CONF=0.4
@@ -1641,7 +1610,7 @@ def main():
                for j in range(0,N_campos):
                     H[i,j]=1- min(random.random()+MIN_CONF, MAX_CONF)      
           # for MAXMENS in [1000]:
-          for MAXMENS in ( 1000, 2000):   
+          for MAXMENS in (50, 100, 200, 500, 1000):   
           #for MAXMENS in (10,20):
      #  for MAXMENS in [100]: 
                for MODO in ("S","I"):

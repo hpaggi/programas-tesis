@@ -662,7 +662,7 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
 
                     else:
                          if MODO == "I":
-                              PTEMPLE=(1-Qy)/(MAXREGS-restantes[X])
+                              PTEMPLE=(1-Qy)*(MAXREGS-restantes[X])/100
                               a1=random.random()
                               if a1 > PTEMPLE:
                                    if restantes[X]>0  :
@@ -826,7 +826,7 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                                         TO_MSG[X,1]=TO_MSG[X,1]+1 
                     else:
                          if MODO == "I":
-                              PTEMPLE=(1-Qy)/(MAXREGS-restantes[X])
+                              PTEMPLE=(1-Qy)*(MAXREGS-restantes[X])/100
                               a=random.random()
                               if a > PTEMPLE:
                                    if restantes[X]>0  :
@@ -980,7 +980,7 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
 
                     else:
                          if MODO == "I":
-                              PTEMPLE=(1-Qy)/(MAXREGS-restantes[X])
+                              PTEMPLE=(1-Qy)*(MAXREGS-restantes[X])/100
                               a=random.random()
                               if a > PTEMPLE:
                                    if restantes[X]>0  :

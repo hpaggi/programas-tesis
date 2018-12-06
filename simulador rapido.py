@@ -1,6 +1,6 @@
 # principal del simulador
 
-def CONSULTAR(X,Y,m,id_campo,nivel,Qx1,Qy):
+def CONSULTAR(X,Y,m,id_campo,nivel,Qx1,Qy,a):
      import random
      import numpy
 # el agente X consulta al Y por el campo id_campo
@@ -8,7 +8,7 @@ def CONSULTAR(X,Y,m,id_campo,nivel,Qx1,Qy):
      global t_entrada
      global muchos
      global largo_cola
-     global a
+     global t
      global tipo_mens
      global t_generac
      global N_agentes
@@ -19,7 +19,6 @@ def CONSULTAR(X,Y,m,id_campo,nivel,Qx1,Qy):
      global niveles     
      global N_favoritos
      global MENSAJES_ITER
-     global pregunte
 
      global SALTO   # el salto que da t para pasar al futuro
      SALTO=999
@@ -29,11 +28,6 @@ def CONSULTAR(X,Y,m,id_campo,nivel,Qx1,Qy):
 
      # print(rr)
      #Resp.write(rr)  
-     
-     # 
-     # si en la fila Y hay un 1 para ese mens y campo, ignorar cons
-    
-     
      if restantes[X]>0: # and MODO == "I" or MODO=="S":
           lista_subcampos=[]
           ccons=numpy.zeros(N_campos, dtype=int)
@@ -55,165 +49,155 @@ def CONSULTAR(X,Y,m,id_campo,nivel,Qx1,Qy):
           tot=0
           lista_subcampos=[]
           if restantes[Y] >0 :  # and MODO == "I" or MODO=="S":
-               if not( (Y,id_msg,id_campo) in pregunte and pregunte[Y,id_msg,id_campo]== True):
-                  
-                    for i in range (1,N_campos):
-                         if formado_por[id_campo,i]== 1:
-                              lista_subcampos.append(i)
-                              tot=tot+1
-     
-                         # ***********************************************************************************************
-                    aleat= random.random()*tot
-                    ncons=int(aleat)
-                    k=0
-                    Z=0
-                         # si no tiene subcampos tot esta en 0 y ncons=0. Si no tiene subcampos asumo que Y no consulta.
-                    if ncons> 0 and not X == Y:
-     
-                         kk=0
-                         for k in range(0,ncons):
-                              s=random.random()
-                              if (X,Y,m,k) in Qx:
-                                   prob=Qx[X,Y,m,k]
-                              else:
-                                   prob=0.5
-                              if s > prob : 
-                                   # aniadir k a la lista de campos a consultar
-     
-                                   if k not in ccons:
-                                        ccons[kk]=k
-                                        kk=kk+1
-                                        if not (Y,m,id_campo) in pendientes:
-                                             pendientes[Y,m,id_campo]=0
-                                        pendientes[Y,m,id_campo]=pendientes[Y,m,id_campo] + 1   
-     
-     
-     
-                    # generar estructuras de que X consulta a Y +++++++++++++++++++++
-                    #
-                    #
-                         espera=int(random.random()*100)
-                         MENSAJES_ITER=MENSAJES_ITER+1
-                         tipo_mens[a+espera,X,Y,m,id_campo]=1
-                         t_generac[X,Y,m,id_campo,a+espera]=a
-                         t_entrada[X,Y,m,id_campo, a]= a+espera
-                         f=id_campo
-                         if (Y, m,f ) in largo_cola:
-                              largo_cola[Y, m, f]= largo_cola[Y, m, f] +1
+               for i in range (1,N_campos):
+                    if formado_por[id_campo,i]== 1:
+                         lista_subcampos.append(i)
+                         tot=tot+1
+
+                    # ***********************************************************************************************
+               aleat= random.random()*tot
+               ncons=int(aleat)
+               k=0
+               Z=0
+                    # si no tiene subcampos tot esta en 0 y ncons=0. Si no tiene subcampos asumo que Y no consulta.
+               if ncons> 0 and not X == Y:
+
+                    kk=0
+                    for k in range(0,ncons):
+                         s=random.random()
+                         if (X,Y,m,k) in Qx:
+                              prob=Qx[X,Y,m,k]
                          else:
-                              largo_cola[X, m, ccons[k]]= 1
-                         niveles[X, Y,m, ccons[k]]=nivel
-                         restantes[X]=restantes[X]-1  
-                         
-                         a=a+1
-                         
-                    # print("genere la consulta X Y")      
-                         # Y consulta a otro por subcampo
-                         fav=0
-               #   print(" Y  consulta a Z. campos a consultar  ",ccons[0:20])
-                         #    rr="campos a consultar  "+str(ccons[0:20])+"\n"
-                         #    Resp.write(rr)
-                                   # ncons dice hasta cuantos campos consulto, kk dice cuantos subcampos consulto realmente
-                         if kk>0: 
-                              #   print("voy a ver subcampos")
-                              k=0
-                              while k < kk:
-                                   if restantes[Y] > 0  : #and MODO == "I" or MODO=="S":
-                                        favor=[]
-                                        p=1
-     
-                                        favor=arma_lista_fav(Y,ccons[k],favor,N_favoritos,N_agentes)
-                                   #  print("fav  para Y ******",Y, "campo",ccons[k],"  ", favor)
-                                   #  print("EXITOS FAV PARA ", Y, "=" )
-                                   #  for x in range (1, N_agentes):
-                                   #  print(FAVORITOS[Y,x ,ccons[k]], " ");
-                                        rr="fav *****"+str(favor[0:10])+"\n"
-               #          Resp.write(rr)
-     
-                                        p=1
-     
-                                        while  p < len(favor):  # en realidad habria que distinguir su ya se determinaron los favoritos y sino usar muchos como fin de loop
-                                             Z= favor[p-1]
-                                             Qz=0.0 # ojo. poner 0.0 a todas las calidades como valor inicial
-                                             if restantes[Y]>0  : # and MODO == "I" or MODO=="S":
-                                                  if not Z == X:
-                                                       nivel=nivel+1
-                                                       niveles[Y,Z,m, ccons[k]]=nivel
-                                                       if not (X,Y,m, ccons[k]) in S:
-                                                            S[X,Y,m, ccons[k]] = 1
-                                                            largo_cola[Y, m, ccons[k]] = 1
-                                                       else:
-                                                            S[X,Y,m, ccons[k]] = S[X,Y,m, ccons[k]] +1
-     
-                                                       largo_cola[Y, m, ccons[k]]=largo_cola[Y, m, ccons[k]]+1
-                                                  # S[Y,id_msg, ccons[k]] = S[Y,id_msg, ccons[k]] +1 
-     
-                                                       Qx[Y,Z,m, ccons[k]]=niveles[Y,Z,m, ccons[k]]/(1+H[Y,ccons[k]])*(1/ niveles[Y,Z,m, ccons[k]])**(PESO_NIVEL + 1)  # +++++ en realidad seria la calidad propia de Y para ese campo ++++++
-     
-     
-                                                       rr="Genero consulta de Y =" +str(Y)+"a Z ="+str(Z)+ " msg "+str(m)+ " campo  "+ str(ccons[k]) + " cola  "+str(largo_cola[Y, m, ccons[k]])+"Qx"+str(Qx[Y,Z,m,ccons[k]])+"\n"
-     
-                                                       espera=int(random.random()*100) + espera
-     
-                                                       tipo_mens[a+espera,X,Y,m,id_campo]=1
-                                                       t_generac[X,Y,m,id_campo,a+espera]=a
-                                                       MENSAJES_ITER=MENSAJES_ITER+1
-                                                       t_entrada[X,Y,m,id_campo, a]= a+espera
-                                                       f=ccons[k]
-                                                       if (Z, m,f ) in largo_cola:
-                                                            largo_cola[Z, m, ccons[k]]= largo_cola[Z, m, ccons[k]] +1
-                                                       else:
-                                                            largo_cola[Z, m, ccons[k]]= 1
-                                                       niveles[Y, Z,m, ccons[k]]=nivel
-                                                       restantes[Y]=restantes[Y]-1
-                                                       a=a+1
-                                             p=p+1
-                                   k=k+1         
-                         else:
-                         #      print("no hay subcampos. Contesto")
-     
-                              # calcular Q propia usando nivel, error, etc
-                              #n=niveles[X,Y,id_msg,id_campo]
-                              #   CALCULO_Qy_SIMPLE(Y, id_msg, id_campo, Qy)
-                              Qy=1/(1+H[Y,id_campo])
-                              Qx[X,Y,m,id_campo]=Qy
-                              if Qy > Qx1 and restantes[Y]>0  and MODO == "I" or MODO=="S" and restantes[Y]>0:
-     
-                                   Qy=devuelvo_resp(Y,X,m,id_campo,nivel,Qy)
-                         #   print("devuelvo respuesta ",Y,X,id_msg,id_campo,str(nivel),str(Qy))
-                                   rr="devuelvo respuesta "+"Y "+ str(Y)+"X "+str(X)+" msg "+str(m)+"campo "+str(id_campo)+ "nivel "+str(nivel)+" Qy "+str(Qy)+"\n"    
-                                   # Resp.write(rr)   
-     
-                    else:          
-                         # calcular Qy usando nivel, error, etc 
-                         # CALCULO_Qy(X,Y,id_msg,id_campo,Qy)
-                         #  Qyy=1
-                         #  CALCULO_Qy_SIMPLE(Y,id_msg,id_campo,Qyy)
-                         #  Qy=Qyy
+                              prob=0.5
+                         if s > prob : 
+                              # aniadir k a la lista de campos a consultar
+
+                              if k not in ccons:
+                                   ccons[kk]=k
+                                   kk=kk+1
+                                   if not (Y,m,id_campo) in pendientes:
+                                        pendientes[Y,m,id_campo]=0
+                                   pendientes[Y,m,id_campo]=pendientes[Y,m,id_campo] + 1   
+
+
+
+               # generar estructuras de que X consulta a Y +++++++++++++++++++++
+               #
+               #
+                    espera=int(random.random()*100)
+                    MENSAJES_ITER=MENSAJES_ITER+1
+                    tipo_mens[a+espera,X,Y,m,id_campo]=1
+                    t_generac[X,Y,m,id_campo,a+espera]=a
+                    t_entrada[X,Y,m,id_campo, a]= a+espera
+                    f=id_campo
+                    if (Y, m,f ) in largo_cola:
+                         largo_cola[Y, m, f]= largo_cola[Y, m, f] +1
+                    else:
+                         largo_cola[X, m, ccons[k]]= 1
+                    niveles[X, Y,m, ccons[k]]=nivel
+                    restantes[X]=restantes[X]-1  
+               # print("genere la consulta X Y")      
+                    # Y consulta a otro por subcampo
+                    fav=0
+          #   print(" Y  consulta a Z. campos a consultar  ",ccons[0:20])
+                    #    rr="campos a consultar  "+str(ccons[0:20])+"\n"
+                    #    Resp.write(rr)
+                              # ncons dice hasta cuantos campos consulto, kk dice cuantos subcampos consulto realmente
+                    if kk>0: 
+                         #   print("voy a ver subcampos")
+                         k=0
+                         while k < kk:
+                              if restantes[Y] > 0  : #and MODO == "I" or MODO=="S":
+                                   favor=[]
+                                   p=1
+
+                                   favor=arma_lista_fav(Y,ccons[k],favor,N_favoritos,N_agentes)
+                              #  print("fav  para Y ******",Y, "campo",ccons[k],"  ", favor)
+                              #  print("EXITOS FAV PARA ", Y, "=" )
+                              #  for x in range (1, N_agentes):
+                              #  print(FAVORITOS[Y,x ,ccons[k]], " ");
+                                   rr="fav *****"+str(favor[0:10])+"\n"
+          #          Resp.write(rr)
+
+                                   p=1
+
+                                   while  p < len(favor):  # en realidad habria que distinguir su ya se determinaron los favoritos y sino usar muchos como fin de loop
+                                        Z= favor[p-1]
+                                        Qz=0.0 # ojo. poner 0.0 a todas las calidades como valor inicial
+                                        if restantes[Y]>0  : # and MODO == "I" or MODO=="S":
+                                             if not Z == X:
+                                                  nivel=nivel+1
+                                                  niveles[Y,Z,m, ccons[k]]=nivel
+                                                  if not (X,Y,m, ccons[k]) in S:
+                                                       S[X,Y,m, ccons[k]] = 1
+                                                       largo_cola[Y, m, ccons[k]] = 1
+                                                  else:
+                                                       S[X,Y,m, ccons[k]] = S[X,Y,m, ccons[k]] +1
+
+                                                  largo_cola[Y, m, ccons[k]]=largo_cola[Y, m, ccons[k]]+1
+                                             # S[Y,id_msg, ccons[k]] = S[Y,id_msg, ccons[k]] +1 
+
+                                                  Qx[Y,Z,m, ccons[k]]=niveles[Y,Z,m, ccons[k]]/(1+H[Y,ccons[k]])*(1/ niveles[Y,Z,m, ccons[k]])**(PESO_NIVEL + 1)  # +++++ en realidad seria la calidad propia de Y para ese campo ++++++
+
+
+                                                  rr="Genero consulta de Y =" +str(Y)+"a Z ="+str(Z)+ " msg "+str(m)+ " campo  "+ str(ccons[k]) + " cola  "+str(largo_cola[Y, m, ccons[k]])+"Qx"+str(Qx[Y,Z,m,ccons[k]])+"\n"
+
+                                                  espera=int(random.random()*100) + espera
+
+                                                  tipo_mens[a+espera,X,Y,m,id_campo]=1
+                                                  t_generac[X,Y,m,id_campo,a+espera]=a
+                                                  MENSAJES_ITER=MENSAJES_ITER+1
+                                                  t_entrada[X,Y,m,id_campo, a]= a+espera
+                                                  f=ccons[k]
+                                                  if (Z, m,f ) in largo_cola:
+                                                       largo_cola[Z, m, ccons[k]]= largo_cola[Z, m, ccons[k]] +1
+                                                  else:
+                                                       largo_cola[Z, m, ccons[k]]= 1
+                                                  niveles[Y, Z,m, ccons[k]]=nivel
+                                                  restantes[Y]=restantes[Y]-1
+                                        p=p+1
+                              k=k+1         
+                    else:
+                    #      print("no hay subcampos. Contesto")
+
+                         # calcular Q propia usando nivel, error, etc
+                         #n=niveles[X,Y,id_msg,id_campo]
+                         #   CALCULO_Qy_SIMPLE(Y, id_msg, id_campo, Qy)
                          Qy=1/(1+H[Y,id_campo])
                          Qx[X,Y,m,id_campo]=Qy
-                         #  +++++++
-                         if not Y == X:
-                              nivel=nivel+ 1
-     
-                    if Qy > Qx1 and restantes[Y]>0  and MODO == "I" or MODO=="S" and restantes[Y]>0:
-                         # devolver respuesta // poner en la cola de mens de entrada de Y un mens de resp con hora 100 mas que t
-               #        print("VOY A devuelvo respuesta ",Y,X,id_msg,id_campo,str(nivel),str(Qy))
-                         # print("voy a devolver resp Qy",Qy)
-                         Qy=devuelvo_resp(Y,X,m,id_campo,nivel,Qy)
-                         Qx[X,Y,m,id_campo]=Qy # tomo la calidad y no me fijo si es un T O 
-               #   print  ("devuelvo resp por ncons =0", "X",X,"Y",Y,"campo",id_campo,"Qy",Qy)
-                         rr="devuelvo respuesta "+str(Y)+str(X)+str(m)+str(id_campo)+str(nivel)+str(Qy)+"\n"        
-               
-               else:
-                    Qy=Qy=1/(1+H[Y,id_campo])
+                         if Qy > Qx1 and restantes[Y]>0  and MODO == "I" or MODO=="S" and restantes[Y]>0:
+
+                              Qy=devuelvo_resp(Y,X,m,id_campo,nivel,Qy)
+                    #   print("devuelvo respuesta ",Y,X,id_msg,id_campo,str(nivel),str(Qy))
+                              rr="devuelvo respuesta "+"Y "+ str(Y)+"X "+str(X)+" msg "+str(m)+"campo "+str(id_campo)+ "nivel "+str(nivel)+" Qy "+str(Qy)+"\n"    
+                              # Resp.write(rr)   
+
+               else:          
+                    # calcular Qy usando nivel, error, etc 
+                    # CALCULO_Qy(X,Y,id_msg,id_campo,Qy)
+                    #  Qyy=1
+                    #  CALCULO_Qy_SIMPLE(Y,id_msg,id_campo,Qyy)
+                    #  Qy=Qyy
+                    Qy=1/(1+H[Y,id_campo])
                     Qx[X,Y,m,id_campo]=Qy
+                    #  +++++++
+                    if not Y == X:
+                         nivel=nivel+ 1
+
+               if Qy > Qx1 and restantes[Y]>0  and MODO == "I" or MODO=="S" and restantes[Y]>0:
+                    # devolver respuesta // poner en la cola de mens de entrada de Y un mens de resp con hora 100 mas que t
+          #        print("VOY A devuelvo respuesta ",Y,X,id_msg,id_campo,str(nivel),str(Qy))
+                    # print("voy a devolver resp Qy",Qy)
+                    Qy=devuelvo_resp(Y,X,m,id_campo,nivel,Qy)
+                    Qx[X,Y,m,id_campo]=Qy # tomo la calidad y no me fijo si es un T O 
+          #   print  ("devuelvo resp por ncons =0", "X",X,"Y",Y,"campo",id_campo,"Qy",Qy)
+                    rr="devuelvo respuesta "+str(Y)+str(X)+str(m)+str(id_campo)+str(nivel)+str(Qy)+"\n"        
+               #  Resp.write(rr)
      else: 
           return(Qy)
 
      return(Qy)
-   
-     
+
 #************************************************************************************
 
 def CALCULO_Qy(X,Y,m,id_campo,Qy):
@@ -319,7 +303,7 @@ def BUSCOPADRES(Y, m, id_campo, lista): # Busca en  la cola de entrada de Y un m
      # print ("busco padres de OMEGA")
           return(lista)
      for ag in range (1,N_agentes):
-          if ((t,ag,Y,m,id_campo) in   tipo_mens) and tipo_mens[a,ag,Y,m,id_campo]=="1":
+          if ((t,ag,Y,m,id_campo) in   tipo_mens) and tipo_mens[t,ag,Y,m,id_campo]=="1":
                lista.append(ag)
 #  print("Busco padres"+ "Y"+ str(Y)+" msg" +str(m)+ " campo "+str(id_campo)+"lista:")
 #  print(lista)
@@ -330,7 +314,7 @@ def BUSCOPADRES(Y, m, id_campo, lista): # Busca en  la cola de entrada de Y un m
 def devuelvo_resp(X,Y,m, id_campo,nivel,Qy2):
      # X devuelve respuesta a Y
      import random
-     global id_msg,a
+     global id_msg
      Qy=0
      lista=[]
      global SALTO
@@ -346,11 +330,11 @@ def devuelvo_resp(X,Y,m, id_campo,nivel,Qy2):
      if restantes[X]>0 : #  and MODO == "I" or MODO=="S":
           if espera < SALTO:
                SALTO=espera    
-          t_entrada[X, Y, m, id_campo,a]= a +  espera
-          t_generac[X, Y, m, id_campo, a+espera]= a 
+          t_entrada[X, Y, m, id_campo,t]= t +  espera
+          t_generac[X, Y, m, id_campo, t+espera]= t 
           MENSAJES_ITER+MENSAJES_ITER+1
 
-          tipo_mens[a+espera,X,Y, m, id_campo]=2
+          tipo_mens[t+espera,X,Y, m, id_campo]=2
           if not (Y, m, id_campo) in largo_cola:
                largo_cola[Y, m, id_campo]=0
           largo_cola[Y, m, id_campo]= largo_cola[Y, m, id_campo] +1
@@ -360,7 +344,6 @@ def devuelvo_resp(X,Y,m, id_campo,nivel,Qy2):
           pendientes[Y,m,id_campo]=pendientes[Y,m,id_campo] - 1
 
           restantes[X]=restantes[X]-1
-          a=a+1
 
           if pendientes[Y,m,id_campo] < 1 or ES_TO(Y,m,id_campo):
 
@@ -516,7 +499,7 @@ def RESPONDO_PADRES(Y,m,id_campo, lista, Qy1,nivel):
 
 # ***********************************************************************************
 def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
-     global id_msg,a
+     global id_msg
      # X envia respuesta a Y
      global t_entrada, t_generac, tipo_mens, largo_cola, niveles, pendientes, restantes, MENSAJES_ITER
      global SALTO
@@ -586,12 +569,11 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                               T[Y,X,m, id_campo]=T[Y,X,m, id_campo]+1
                          else:
                               T[Y,X,m, id_campo]=1
-                         t_entrada[X,Y,m,id_campo,a]=a+espera 
+                         t_entrada[X,Y,m,id_campo,t]=t+espera 
                          MENSAJES_ITER=MENSAJES_ITER+1
-                         t_generac[X,Y,m,id_campo,a+espera]=a
-                         tipo_mens[a+espera,X,Y,m,id_campo]=2 
+                         t_generac[X,Y,m,id_campo,t+espera]=t
+                         tipo_mens[t+espera,X,Y,m,id_campo]=2 
                          nivel=niveles[X,Y,m, id_campo]=niveles[X,Y,m,id_campo]+1
-                         a=a+1
                          if t_generac[X,Y,m,id_campo,hora] + TIMEOUT > t_entrada[X,Y,m,decision, t_generac[X,Y,m,decision,hora]] : # no es t o
 
 
@@ -625,11 +607,10 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                               for z in lista:
                                    if restantes[Y]>0:
                                         espera=int(random.random()*100)
-                                        t_entrada[Y,z,m,id_campo,a]=a+espera
+                                        t_entrada[Y,z,m,id_campo,t]=t+espera
                                         MENSAJES_ITER=MENSAJES_ITER+1
-                                        t_generac[Y,z,m,id_campo,a+espera]=a
-                                        tipo_mens[a+espera,Y,z,m,id_campo]=2
-                                        a=a+1
+                                        t_generac[Y,z,m,id_campo,t+espera]=t
+                                        tipo_mens[t+espera,Y,z,m,id_campo]=2
                                         largo_cola[z,m, id_campo]=largo_cola[z,m, id_campo]-1
                                         FAVORITOS[Y,z,id_campo]=FAVORITOS[Y,z,id_campo]+1
                                         pendientes[z,m,id_campo]=pendientes[z,m,id_campo]-1   
@@ -651,7 +632,7 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                               pass
                          else:
                               if Y == 1 :  # T O es cuando el sistema no contesta a tiempo, cuando NADIE contesta a tiempo
-                                   if max(t_generac[X,1,m,id_campo],axis=0) +TIMEOUT < a:                 
+                                   if max(t_generac[X,1,m,id_campo],axis=0) +TIMEOUT < t:                 
                                         TIMEOUTS = TIMEOUTS +1
 
                     else:
@@ -667,16 +648,14 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                                              T[Y,X, m, id_campo]=T[Y,X,m, id_campo]+1
                                         else:
                                              T[Y,X,m, id_campo]=1
-                                        t_entrada[X,Y,m,id_campo,a]=a+espera
-                                        t_generac[X,Y,m,id_campo,t+espera]=a
-                                        
+                                        t_entrada[X,Y,m,id_campo,t]=t+espera
+                                        t_generac[X,Y,m,id_campo,t+espera]=t
                                         MENSAJES_ITER=MENSAJES_ITER+1
-                                        tipo_mens[a+espera,X,Y,m,id_campo]=2
+                                        tipo_mens[t+espera,X,Y,m,id_campo]=2
                                         nivel=niveles[X,Y,m,id_campo]=niveles[X,Y,m,id_campo]+1
                                         largo_cola[Y,m, id_campo]=largo_cola[Y,m, id_campo]+1
                                         FAVORITOS[Y,X,id_campo]=FAVORITOS[Y,X,id_campo]+1
                                         pendientes[Y,m,id_campo]=pendientes[Y,m,id_campo]-1
-                                        a=a+1
                                         if pendientes[Y,m,id_campo] < 1:
                                              # Y debe devolver la respuesta a quien lo consulto
                                              lista=[]
@@ -752,10 +731,10 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
 
                          Qx[X,Y,m,id_campo]=Qx1
                          T[Y,X,m, id_campo]=T[Y,X,m, id_campo]+1
-                         t_entrada[X,Y,m,id_campo,a]=a+espera 
+                         t_entrada[X,Y,m,id_campo,t]=t+espera 
                          MENSAJES_ITER=MENSAJES_ITER+1
-                         t_generac[X,Y,m,id_campo,a+espera]=a
-                         tipo_mens[a+espera,X,Y,m,id_campo]=2 
+                         t_generac[X,Y,m,id_campo,t+espera]=t
+                         tipo_mens[t+espera,X,Y,m,id_campo]=2 
                          nivel=niveles[X,Y,m,id_campo]=niveles[X,Y,m,id_campo]+1
                          if t_generac[X,Y,m,id_campo,hora] + TIMEOUT > t_entrada[X,Y,m,decision, t_generac[X,Y,m,decision,hora]] : # no es t o
 
@@ -785,10 +764,10 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                               for z in lista: 
                                    if restantes[Y]>0:
                                         espera=int(random.random()*100)
-                                        t_entrada[Y,z,m,id_campo,a]=a+espera
-                                        t_generac[Y,z,m,id_campo,a+espera]=a
+                                        t_entrada[Y,z,m,id_campo,t]=t+espera
+                                        t_generac[Y,z,m,id_campo,t+espera]=t
                                         MENSAJES_ITER=MENSAJES_ITER+1
-                                        tipo_mens[a+espera,Y,z,m,id_campo]=2
+                                        tipo_mens[t+espera,Y,z,m,id_campo]=2
                                         largo_cola[z,m, id_campo]=largo_cola[z,m, id_campo]-1
                                         FAVORITOS[Y,z,id_campo]=FAVORITOS[Y,z,id_campo]+1
                                         pendientes[z,m,id_campo]=pendientes[z,m,id_campo]-1   
@@ -812,7 +791,7 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                               pass
                          else:
                               if Y == 1 :  # T O es cuando el sistema no contesta a tiempo, cuando NADIE contesta a tiempo
-                                   if max(t_generac[X,1,m,id_campo],axis=0) +TIMEOUT < a:                 
+                                   if max(t_generac[X,1,m,id_campo],axis=0) +TIMEOUT < t:                 
                                         TIMEOUTS = TIMEOUTS +1
                                         TO_MSG[X,1]=TO_MSG[X,1]+1 
                     else:
@@ -825,10 +804,10 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                                         if espera < SALTO:
                                              SALTO=espera
                                              T[Y,X, m, id_campo]=T[Y,X,m, id_campo]+1
-                                        t_entrada[X,Y,m,id_campo,a]=a+espera
+                                        t_entrada[X,Y,m,id_campo,t]=t+espera
                                         MENSAJES_ITER=MENSAJES_ITER+1
-                                        t_generac[X,Y,m,id_campo,t+espera]=a
-                                        tipo_mens[a+espera,X,Y,m,id_campo]=2
+                                        t_generac[X,Y,m,id_campo,t+espera]=t
+                                        tipo_mens[t+espera,X,Y,m,id_campo]=2
                                         nivel=niveles[X,Y,m,id_campo]=niveles[X,Y,m,id_campo]+1
                                         largo_cola[Y,m, id_campo]=largo_cola[Y,m, id_campo]+1
                                         FAVORITOS[Y,X,id_campo]=FAVORITOS[Y,X,id_campo]+1
@@ -905,10 +884,10 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
 
                          Qx[X,Y,m,id_campo]=Qx1
                          T[Y,X,m, id_campo]=T[Y,X,m, id_campo]+1
-                         t_entrada[X,Y,m,id_campo,a]=a+espera 
+                         t_entrada[X,Y,m,id_campo,t]=t+espera 
                          MeNSAJES_ITER=MENSAJES_ITER+1
-                         t_generac[X,Y,m,id_campo,a+espera]=a
-                         tipo_mens[a+espera,X,Y,m,id_campo]=2 
+                         t_generac[X,Y,m,id_campo,t+espera]=t
+                         tipo_mens[t+espera,X,Y,m,id_campo]=2 
                          nivel=niveles[X,Y,m,id_campo]=niveles[X,Y,m,id_campo]+1
                          if t_generac[X,Y,m,id_campo,hora] + TIMEOUT > t_entrada[X,Y,m,decision, t_generac[X,Y,m,decision,hora]] : # no es t o
 
@@ -940,10 +919,10 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                               for z in lista:
                                    if restantes[Y]>0:
                                         espera=int(random.random()*100)
-                                        t_entrada[Y,z,m,id_campo,a]=a+espera
-                                        t_generac[Y,z,m,id_campo,a+espera]=a
+                                        t_entrada[Y,z,m,id_campo,t]=t+espera
+                                        t_generac[Y,z,m,id_campo,t+espera]=t
                                         MENSAJES_ITER=MENSAJES_ITER+1
-                                        tipo_mens[a+espera,Y,z,m,id_campo]=2
+                                        tipo_mens[t+espera,Y,z,m,id_campo]=2
                                         largo_cola[z,m, id_campo]=largo_cola[z,m, id_campo]-1
                                         FAVORITOS[Y,z,id_campo]=FAVORITOS[Y,z,id_campo]+1
                                         pendientes[z,m,id_campo]=pendientes[z,m,id_campo]-1   
@@ -976,10 +955,10 @@ def RESPONDER(X,Y,m,id_campo,Qy,N_agentes,MODO, hora):
                                         if espera < SALTO:
                                              SALTO=espera
                                              T[Y,X, m, id_campo]=T[Y,X,m, id_campo]+1
-                                        t_entrada[X,Y,m,id_campo,a]=a+espera
+                                        t_entrada[X,Y,m,id_campo,t]=t+espera
                                         MENSAJES_ITER=MENSAJES_ITER+1
-                                        t_generac[X,Y,m,id_campo,a+espera]=a
-                                        tipo_mens[a+espera,X,Y,m,id_campo]=2
+                                        t_generac[X,Y,m,id_campo,t+espera]=t
+                                        tipo_mens[t+espera,X,Y,m,id_campo]=2
                                         nivel=niveles[X,Y,m,id_campo]=niveles[X,Y,m,id_campo]+1
                                         largo_cola[Y,m, id_campo]=largo_cola[Y,m, id_campo]+1
                                         FAVORITOS[Y,X,id_campo]=FAVORITOS[Y,X,id_campo]+1
@@ -1057,19 +1036,10 @@ def arma_lista_fav(x,c,l,N_favoritos,N_agentes):
 def PROCESO_ARCH():
      SALTO=999
      import numpy, random
-     global id_msg, MAXMENS, MAXREGS,N_agentes,MAXIT,MIN_CONF_O,MAX_CONF_O, hora_inicial
-     global a, decision,line111, RESTANTES_ANT,RESTANTES_ANT_REG
-     global t_entrada, tipo_mens, t_generac, largo_cola,Q,Qx,niveles,S,T  , pendientes, restantes,cuenta_to, cuenta_e, cuenta_a, TABLA_TO, MENSAJES_ITER, pregunte
+     global id_msg, MAXMENS, MAXREGS,N_agentes,MAXIT,MIN_CONF_O,MAX_CONF_O
+     global t, decision,line111, RESTANTES_ANT,RESTANTES_ANT_REG
+     global t_entrada, tipo_mens, t_generac, largo_cola,Q,Qx,niveles,S,T  , pendientes, restantes,cuenta_to, cuenta_e, cuenta_a, TABLA_TO, MENSAJES_ITER
      TIMEOUTS=0
-     
-
-     hora_inicial=numpy.zeros((MAXIT+1,MAXMENS+1,N_campos+1),dtype=int)   # la hora a la que omega consulta al sistema
-     #hora_inicial=numpy.zeros((34,40,74),dtype=int)   # la hora a la que omega consulta al sistema   
-     
-     #pregunte=numpy.zeros((N_agentes+1,N_agentes+1,MAXMENS+1, N_campos+1), dtype=bool) # si ya pregunto un agente a otro por ese campo en ese mensaje. previene loops.
-     pregunte={}
-     
-     
 #  cuenta_to=0
      cuenta_e=0
      cuenta_a=0
@@ -1105,11 +1075,9 @@ def PROCESO_ARCH():
      Qx={}
      T={}
      niveles={}
-     TO_MSG=numpy.zeros((N_agentes+1, N_agentes+1), dtype=int)  
-     
+     TO_MSG=numpy.zeros((N_agentes+1, N_agentes+1), dtype=int)                    
      id_msg=0
      llave=0
-     a=0
 
      while len(line111) > 0:
           line1=f.readline()
@@ -1131,7 +1099,7 @@ def PROCESO_ARCH():
      #  Cargo las calidades iniciales
           Qx1=min(random.random()+MIN_CONF_O, MAX_CONF_O)
           Qy=0
-          taux=0
+          taux=t
      #  rr="**************************************** proceso registro "+str(id_msg)+"\n"
      #  print("*************************************** proceso registro "+str(id_msg))
      # Resp.write(rr)
@@ -1164,13 +1132,12 @@ def PROCESO_ARCH():
                               niveles[1,lista[i-2],m, decision]=nivel
                     #     T=t
                          if restantes[1] > 0  : # and MODO == "I" or MODO=="S":
-                              
+                              a=t
                               if i> 2 and m < MAXREGS + 1 :
-                                   hora_inicial[iteracion, m,decision]=a
-                                   Qy=CONSULTAR(1, lista[i-2], m, decision, niveles[1,lista[i-2],m, decision], Qx1, Qy)  
+                                   Qy=CONSULTAR(1, lista[i-2], m, decision, niveles[1,lista[i-2],m, decision], Qx1, Qy,a)  
                          #   print("calidad devuelta a OMEGA en CONSULTAR"+str(Qy) ," calidad propiade OMEGA", Qx1)
                               #   restantes[1]=restantes[1]-1
-                                   taux=a
+                                   taux=t
 
 
 
@@ -1198,71 +1165,69 @@ def PROCESO_ARCH():
      # while tt < 200 :
      #   hay = 0
      #   a=t+tt
-          a=0
+          a=t
           amin=999
-          puntero=0
+         
           for (a,xx, ag, m, campo) in sorted(list(tipo_mens.keys())) :
               
-          #    print (sorted(list(tipo_mens.keys())))
+               print (sorted(list(tipo_mens.keys())))
               
                cl=sorted(list(tipo_mens.keys()))
-               cl1=cl[puntero]
+               cl1=cl[0]
                a=cl1[0]
                xx=cl1[1]
                ag=cl1[2]
                m=cl1[3]
                campo=cl1[4]
                if PRIMERO == 1:
-                    aant= a
-                    t= a
+                    aant=a
                     xxant=xx
                     agant=ag
                     mant=m
                     campoant=campo
                     PRIMERO =0
                else:
-                 #   print(len(tipo_mens))
-                    
-                 #   tipo_mens.pop((aant,xxant, agant, mant, campoant))
-                 #   t_entrada.pop((xxant, agant, mant, campoant,t_generac[xxant, agant, mant, campoant, aant])) 
+                    print(len(tipo_mens))
+                    tipo_mens.pop((aant,xxant, agant, mant, campoant))
+                    t_entrada.pop((xxant, agant, mant, campoant,t_generac[xxant, agant, mant, campoant, aant])) 
                     
                     #  habria que borrar lo de las otras trablas para esa clave !!!! ++++++++++++++++++++++++++++++++++++++++++++++++++
                     
                 #    print(len(tipo_mens))
                     cl=sorted(list(tipo_mens.keys()))
-                    cl1=cl[puntero]
+                    cl1=cl[0]
                     a=cl1[0]
                     xx=cl1[1]
                     ag=cl1[2]
                     m=cl1[3]
                     campo=cl1[4]                    
-                    aant= a
+                    aant=a
                     xxant=xx
                     agant=ag
                     mant=m
                     campoant=campo
-                    t= a            
-               puntero=puntero+1     
+                                
+                    
               
       #         print(sorted(tipo_mens.keys()))
-               if  a < amin:
-                    amin =  a
-                          
+               if a < amin:
+                    amin = a
+        # ++++COMO PUEDE SER QUE HAYA MENSAJES COM TIPO_MENS PERO SIN T_GENERAC+++++++++++++                   
       #         print ("proceso *******",a,xx,ag,m,campo)
       #         print(t_generac)
-               if t_generac[xx, ag, m, campo, a] + TIMEOUT > a and tipo_mens[ a,xx, ag, m, campo] == 2 :  #  NO ES TO 
+               if t_generac[xx, ag, m, campo,a] + TIMEOUT > t and tipo_mens[a,xx, ag, m, campo] == 2 :  #  NO ES TO 
                     pendientes[ag,m,campo]=pendientes[ag,m,campo] - 1 
 
      #               print("no es T O y es repuesta de",xx," a", ag)
                     hay =1 
                     Qaux=Q[xx,ag,m,campo]
                     if restantes[ag]>0 :           # and MODO == "I" or MODO=="S":
-                         
-                         RESPONDER(ag,xx,m,campo,Qaux,N_agentes,MODO, a)
+                         t=a
+                         RESPONDER(ag,xx,m,campo,Qaux,N_agentes,MODO,a)
                         
                          FAVORITOS[ag,xx,campo]=FAVORITOS[ag,xx,campo]+1
                else:  
-                    if t_generac[xx, ag, m, campo, a] + TIMEOUT > amin  and tipo_mens[ a,xx, ag, m, campo] == 1 :    # 1 - consulta 2 - Respuesta :
+                    if t_generac[xx, ag, m, campo,a] + TIMEOUT > amin  and tipo_mens[a,xx, ag, m, campo] == 1 :    # 1 - consulta 2 - Respuesta :
 
                          hay =1                         
         #                 print("no es T O y es consulta de",xx," a", ag)   
@@ -1274,19 +1239,12 @@ def PROCESO_ARCH():
                          Qaux=Q[xx,ag,m,campo]
 
                          #S[xx,m,campo]=S[xx,m,campo]+1
-                         
-                         
-                         
-                                   
-                     
-                         if (ag,m,campo) in pregunte and pregunte[ag,i,m,campo] ==True and MODO == "I" or MODO=="S":
-                              pregunte[xx,ag,m,campo]=True                         
                          if restantes[xx]>0  :     # and MODO == "I" or MODO=="S":
-                              
-                              CONSULTAR(xx, ag,m, campo,niveles[xx, ag, m, campo], Qaux,Qy)  
+                              t=a
+                              CONSULTAR(xx, ag,m, campo,niveles[xx, ag, m, campo], Qaux,Qy,a)  
                          
                     else:
-                         if t_generac[xx, ag, m, campo, a] + TIMEOUT <  a:
+                         if t_generac[xx, ag, m, campo,a] + TIMEOUT < a:
                               TO_MSG[xx,ag]=TO_MSG[xx,ag]+1
 
                               TIMEOUTS=TIMEOUTS+1
@@ -1295,7 +1253,7 @@ def PROCESO_ARCH():
               
             
             
-       #   print ("PARA  1")
+          print ("PARA  1")
                
                
                
@@ -1309,106 +1267,105 @@ def PROCESO_ARCH():
 
           #while k < largo_cola[1,id_msg,decision] + 1:
           #while k < 100:
-          taux1=a
-          ES_EXITO_A=0
-          ES_EXITO_E=0
-          #for (a,xx, ag, m, campo) in sorted(list(tipo_mens.keys())) :
-               #ES_EXITO_E=0
-               #ES_EXITO_A=0
-               #NO_ES_TO=0   # indica si hubo  o no T O . Si aunque sea uno solo contesta a omega a tiempo, no es TO
+          taux1=t
+          for (a,xx, ag, m, campo) in sorted(list(tipo_mens.keys())) :
+               ES_EXITO_E=0
+               ES_EXITO_A=0
+               NO_ES_TO=0   # indica si hubo  o no T O . Si aunque sea uno solo contesta a omega a tiempo, no es TO
                    
                    
-               #pant=0
-               #rant=0
-               #tmax=0
-               #p=1
-               ##   print ("veo si hay mensajes para el momento actual  t="+str(taux))
-               ##   rr="veo si hay mensajes para el momento actual  t="+str(taux)+"\n"
-               ##  Resp.write(rr)
+               pant=0
+               rant=0
+               tmax=0
+               p=1
+               #   print ("veo si hay mensajes para el momento actual  t="+str(taux))
+               #   rr="veo si hay mensajes para el momento actual  t="+str(taux)+"\n"
+               #  Resp.write(rr)
      
-               #p=0
-               #r=1
-               #tie=a
-               #c=decision
-               #pp=0
-               #rr=r
+               p=0
+               r=1
+               tie=t
+               c=decision
+               pp=0
+               rr=r
      
                     
      
-               #t=a       
+               t=a       
                     
-               #if (xx,1,m,decision,a) in list(t_entrada) and tipo_mens[ a,xx,1,m,decision]==2:
+               if (xx,1,m,decision,a) in list(t_entrada) and tipo_mens[a,xx,1,m,decision]==2:
      
-                    ##      print("Hay mensaje para OMEGA desde ag" + str(p)+" para mens "+ str(r))
-                              #pant=p
-                              #rant=r
-                              #k=k+1
+                    #      print("Hay mensaje para OMEGA desde ag" + str(p)+" para mens "+ str(r))
+                              pant=p
+                              rant=r
+                              k=k+1
 
-                         ## Qy calculada segun la form general para nivel =1 y error 0.95 es aprox 0.95
-                         ## Qy=0.95  # Calidad de Omega: 0.95
-                         ## Qy= random.random()  # dejo la calidad de Omega al azar
-                         ##       print("---- Calidad de OMEGA ="+str(Qx1))
-                              #if t_generac[xx, 1, m, decision, a] + TIMEOUT > t_entrada [xx,1,m,decision, a]: # en realidad deberia ser el t en que omega consulto al sist + TIMEOUT ++++++
-                                   ## no es time out
-                                   #NO_ES_TO=1
-                                   #if Q[xx,1, m,decision] > Qx1  : # no importa el MODO, es estricto   
-                                        #ES_EXITO_E=1
-                                   ##  EXITOS_E =EXITOS_E+1
-                                        #FAVORITOS[1,xx,decision]=FAVORITOS[1,xx,decision]+1
+                         # Qy calculada segun la form general para nivel =1 y error 0.95 es aprox 0.95
+                         # Qy=0.95  # Calidad de Omega: 0.95
+                         # Qy= random.random()  # dejo la calidad de Omega al azar
+                         #       print("---- Calidad de OMEGA ="+str(Qx1))
+                              if t_generac[xx, 1, m, decision,a] + TIMEOUT > t_entrada [xx,1,m,decision,a]:
+                                   # no es time out
+                                   NO_ES_TO=1
+                                   if Q[xx,1, m,decision] > Qx1  : # no importa el MODO, es estricto   
+                                        ES_EXITO_E=1
+                                   #  EXITOS_E =EXITOS_E+1
+                                        FAVORITOS[1,xx,decision]=FAVORITOS[1,xx,decision]+1
 
-                                   ## el tiempo gastado es el max (t de la entrada  - t de generac) para las distintas respuestas. sobre que calculo el maximo?????  +++++
-                                   ## if tmax < taux - t :
-                                   ##   tmax=taux-t
-                                   ## if pant==0:   # es la primer vez que proceso esa entrada 
-                                   ##   NO_TO=NO_TO+1
-                                   ##          print ("calidad Y"+str(Qy)+"calidad X "+str(Qx[1, p, r,decision]))       
-                                        #FAVORITOS[1,xx,decision]= FAVORITOS[1,xx,decision] + 1           
-
-
-                                   #else:
-                                        #if abs(Q[xx,1, m,decision] - Qx1)<0.01:
-                                             #ES_EXITO_A=1
-                                   ##       EXITOS_A =EXITOS_A+1
+                                   # el tiempo gastado es el max (t de la entrada  - t de generac) para las distintas respuestas. sobre que calculo el maximo?????  +++++
+                                   # if tmax < taux - t :
+                                   #   tmax=taux-t
+                                   # if pant==0:   # es la primer vez que proceso esa entrada 
+                                   #   NO_TO=NO_TO+1
+                                   #          print ("calidad Y"+str(Qy)+"calidad X "+str(Qx[1, p, r,decision]))       
+                                        FAVORITOS[1,xx,decision]= FAVORITOS[1,xx,decision] + 1           
 
 
-                              #else:
-                                   #TO_MSG[xx,1]=TO_MSG[xx,1]+1
+                                   else:
+                                        if abs(Q[xx,1, m,decision] - Qx1)<0.0001:
+                                             ES_EXITO_A=1
+                                   #       EXITOS_A =EXITOS_A+1
 
-                              #p=pant+1
+
+                              else:
+                                   TO_MSG[xx,1]=TO_MSG[xx,1]+1
+
+                              p=pant+1
      
                          
                     
-                         ## no se si hacer temple simulado aca
-                         ## taux=taux+1
-                              #if NO_ES_TO ==0:
-                                   #TIMEOUTS=TIMEOUTS+1  
+                         # no se si hacer temple simulado aca
+                         # taux=taux+1
+                              if NO_ES_TO ==0:
+                                   TIMEOUTS=TIMEOUTS+1  
                              
-                         ##    print("##### t_gen","   ", t_generac)
-                         ##    print ("%%%%%%%%% t_ent", " ",t_entrada)
-                              #if len(t_entrada)==0:
-                                   #if (iteracion,N_agentes,MAXREGS,MAXMENS) in TABLA_TO:
-                                        #TABLA_TO[iteracion,N_agentes,MAXREGS,MAXMENS]= TABLA_TO[iteracion,N_agentes,MAXREGS,MAXMENS] + 1
-                                   #else:
-                                        #TABLA_TO[iteracion,N_agentes,MAXREGS,MAXMENS]=1      
-                                   #continue
-          ##  print(" &&&&& tipo_mens", tipo_mens)  
-         
+                         #    print("##### t_gen","   ", t_generac)
+                         #    print ("%%%%%%%%% t_ent", " ",t_entrada)
+                              if len(t_entrada)==0:
+                                   if (iteracion,N_agentes,MAXREGS,MAXMENS) in TABLA_TO:
+                                        TABLA_TO[iteracion,N_agentes,MAXREGS,MAXMENS]= TABLA_TO[iteracion,N_agentes,MAXREGS,MAXMENS] + 1
+                                   else:
+                                        TABLA_TO[iteracion,N_agentes,MAXREGS,MAXMENS]=1      
+                                   continue
+          #  print(" &&&&& tipo_mens", tipo_mens)  
+          if iteracion > 30:
+               print("PARA  2")
           aporta_e=0
           aporta_a=0
           enhora=0
           u=1
-          tiempo=a
+          tiempo=t
           uu=0
           NO=0
-        
+          NO=0 
           ESTRICTO=0
           AMPLIO=0
           conte=0               
-          for (tiempo1,u,uu,m1,decision1) in sorted(list(tipo_mens.keys())): 
+          for tiempo1,u,uu,m1,decision1 in sorted(list(tipo_mens.keys())): 
                     #   print (tipo_mens[tiempo,u,1,id_msg,decision],t_generac[u,1,id_msg,decision,tiempo],t_entrada[u,1,id_msg,decision, t_generac[u,1,id_msg,decision,tiempo]])
                if uu==1 :   
           #   print ("encontre", u,1,m,decision,tiempo )
-                    if tipo_mens[tiempo1,u,1,m1,decision1]== 2 and   hora_inicial[iteracion, m1,decision1]+ TIMEOUT > t_entrada[u,1,m1,decision1, t_generac[u,1,m1,decision1,tiempo1]]  and m1==m and decision1==decision:
+                    if tipo_mens[tiempo1,u,1,m1,decision1]== 2 and  t_generac[u,1,m1,decision1,tiempo1] + TIMEOUT > t_entrada[u,1,m1,decision1, t_generac[u,1,m1,decision1,tiempo1]]  and m1==m and decision1==decision and tiempo1 > tiempo:
                #   print("************  NO ES T O")
                          enhora=1
                          NO=1
@@ -1420,7 +1377,7 @@ def PROCESO_ARCH():
                                    AMPLIO=1
      
                     else:
-                         if hora_inicial[iteracion, m1,decision1]+ TIMEOUT + TIMEOUT < t_entrada[u,1,m1,decision1, t_generac[u,1,m1,decision1,tiempo1]] and m1==m and decision1==decision and tiempo1>tiempo:
+                         if t_generac[u,1,m1,decision1,tiempo1] + TIMEOUT < t_entrada[u,1,m1,decision1, t_generac[u,1,m1,decision1,tiempo1]] and m1==m and decision1==decision and tiempo1>tiempo:
                               TO_MSG[u,1]=TO_MSG[u,1]+1
           if NO == 0:
           #  print("********ESSSSS TO") 
@@ -1436,14 +1393,14 @@ def PROCESO_ARCH():
           if enhora == 1 and aporta_e == 0 and aporta_a == 0: # viene unmensaje pero la calidad no sirve
                cuenta_to=cuenta_to+1
      
-         # print("cuenta E E ", cuenta_e)
           
-        #  print("cuenta E A ", cuenta_a)          
-     # print("------------------ cuenta to ---------------",cuenta_to, "  iteracion ", iteracion, "N_agentes", N_agentes,"MAXREGS",  MAXREGS)  
+# print("------------------ cuenta to ---------------",cuenta_to, "  iteracion ", iteracion, "N_agentes", N_agentes,"MAXREGS",  MAXREGS)  
 
      TABLA_TO[iteracion,N_agentes,MAXREGS, MAXMENS]=cuenta_to
 
-     
+     #print("cuenta E E ", cuenta_e)
+
+     # print("cuenta E A ", cuenta_a)
 
      TABLA_EXITOS_A[iteracion,N_agentes,MAXREGS,MAXMENS]=cuenta_a
 
@@ -1456,7 +1413,7 @@ def PROCESO_ARCH():
           EXITOS_E=EXITOS_E+1
 
      SALTO=max(SALTO,1)
-     #t=t+SALTO
+     t=t+SALTO
 
      RESTANTES_ANT_REG= N_agentes*MAXMENS
 
@@ -1491,19 +1448,9 @@ def main():
      import csv
      global Resp
      global id_msg
-     global MAXMENS,N_agentes, MAXIT,MAXREGS,MIN_CONF_O,MAX_CONF_O,N_campos, hora_inical
-     global t_entrada, t_generac, tipo_mens, largo_cola, niveles, pendientes, restantes, MENSAJES_ITER,a, pregunte
-     
+     global MAXMENS,N_agentes, MAXIT,MAXREGS,MIN_CONF_O,MAX_CONF_O,N_campos
+     global t_entrada, t_generac, tipo_mens, largo_cola, niveles, pendientes, restantes, MENSAJES_ITER
 
-    
-    # import py_compile
-    # aq=1
-   #  Qwww=py_compile.compile("C:/Users/hpaggi/Dropbox/docs tesis/prototipo/cuarto negocio/simuladorrapido.py", cfile="C:/Users/hpaggi/Dropbox/docs tesis/prototipo/cuarto negocio/rapidito")
-   #  print(Qwww)
-   #
-   #
-   #aq=2    
-     
      MENSAJES_ITER=0
      s="LOG DE SIMULADOR.txt"
      Resp=open(s,'w')
@@ -1577,7 +1524,7 @@ def main():
      # ESTRUCTURAS-
      #***************************************************************************************************
      import random
-     global a
+     global t
      global FAVORITOS
      global t_entrada
      global t_generac
@@ -1616,18 +1563,15 @@ def main():
      global line111, line1
      global iteracion
      global TOLERANCIA
-     global a
+     global t
      global restantes
-     
-     
-     
      TOLERANCIA=2 # cuantas veces se admite un to desde un favorito antes de borrarlo de la lista de favoritos
      # cant reg a prcesar por OMEGA en el archivo
      global MAXREGS
      MAXREGS= 32 
 
      #for N_agentes in (10,40):
-     for N_agentes in (600,700):
+     for N_agentes in (40,41):
 
           # los errores  y los topes de confianza
           MIN_CONF=0.4
@@ -1641,8 +1585,8 @@ def main():
                for j in range(0,N_campos):
                     H[i,j]=1- min(random.random()+MIN_CONF, MAX_CONF)      
           # for MAXMENS in [1000]:
-          for MAXMENS in ( 1000, 2000):   
-          #for MAXMENS in (10,20):
+         # for MAXMENS in (50, 100, 200, 500, 1000):   
+          for MAXMENS in (50, 100):
      #  for MAXMENS in [100]: 
                for MODO in ("S","I"):
           # for MODO in ["S"]:
@@ -1660,7 +1604,7 @@ def main():
                          t=0  
                          id_msg=0
                          TIMEOUTS=0
-                         global cuenta_to, cuenta_e, cuenta_o,cuenta_a
+                         global cuenta_to, cuenta_e, cuenta_o
                          cuenta_to=0
                          cuenta_a=0
                          cuenta_e=0              
@@ -1754,7 +1698,7 @@ def main():
 
                          #**************************************************************** 
                          res=PROCESO_ARCH()
-                   #      print(MENSAJES_ITER)
+                         print(MENSAJES_ITER)
                          #****************************************************************      
 
                          #TABLA_EXITOS_A.append(iteracion,N_agentes,MAXREGS,MAXMENS)
