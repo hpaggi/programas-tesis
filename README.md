@@ -1,4 +1,4 @@
-# Fusion Holónica de Información
+# Holonic Information Fusion
 
 Repository associated with Horacio Paggi's PhD Thesis and the scientific publications derived from it. The [PhD Thesis](https://oa.upm.es/54198/) is entitled "Modelo de fusión holónica de información para la mejora de la calidad de la información en redes peer-to-peer con recursos limitados", and is directed by Professors Javier Soriano and Juan A. Lara. The Thesis presents a model that fuses information, applying holonic principles, with the aim of improving the quality of information in networks with limited resources.
 
